@@ -1,10 +1,10 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 
 // eslint-disable-next-line react/prop-types
-export default function CardPost({ image, account, onClick }) {
+export default function CardPost({ image, category, title, authorName, authorImage, date, onClick }) {
   return (
     <div
-      className="card shadow-sm card-hover"
+      className="shadow-sm card card-hover"
       style={{ borderRadius: "12px", cursor: "pointer" }}
       onClick={onClick} // Handler untuk klik
     >
@@ -20,21 +20,19 @@ export default function CardPost({ image, account, onClick }) {
         }}
       />
       <div className="card-body">
-        <span className="badge bg-light text-primary mb-2">Technology</span>
-        <h5 className="card-title">
-          The Impact of Technology on the Workplace: How Technology is Changing
-        </h5>
-        <div className="d-flex align-items-center mt-3">
+        <span className="mb-2 badge bg-light text-primary">{category}</span>
+        <h5 className="card-title">{title}</h5>
+        <div className="mt-3 d-flex align-items-center">
           <img
-            src={account}
+            src={authorImage}
             alt="Author"
             className="rounded-circle me-2"
             style={{ width: "40px", height: "40px" }}
           />
           <div>
-            <span className="fw-bold">Tracey Wilson</span>
+            <span className="fw-bold">{authorName}</span>
             <br />
-            <small className="text-muted">August 20, 2022</small>
+            <small className="text-muted">{new Date(date).toLocaleDateString()}</small>
           </div>
         </div>
       </div>

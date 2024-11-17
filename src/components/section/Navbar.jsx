@@ -1,8 +1,32 @@
+import { useState, useEffect } from "react";
 import Logo from "../../assets/logo.png";
+import { auth } from "../../firebase/setup";
+import { signOut, onAuthStateChanged } from "firebase/auth";
 
 export default function Navbar() {
+  // Mock authentication state (replace this with your actual authentication logic)
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAuthenticated(!!user);
+      setCurrentUser(user);
+    });
+
+  }, []);
+
+  const handleLogout = () => {
+    signOut(auth);
+  };
+ 
+  
+console.log(isAuthenticated);
+console.log(currentUser);
+  auth.currentUser?.getIdToken().then(token => console.log('Token:',token)).catch(error => console.error('Error fetching token:', error));
+
   return (
-    <div className="container fixed-top bg-white">
+    <div className="container bg-white fixed-top">
       <nav className="navbar navbar-expand-lg ">
         <div className="container-fluid">
           <a className="navbar-brand" href="#">
@@ -20,7 +44,7 @@ export default function Navbar() {
             <span className="navbar-toggler-icon"></span>
           </button>
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul className="navbar-nav mx-auto mb-2 mb-lg-0">
+            <ul className="mx-auto mb-2 navbar-nav mb-lg-0">
               <li className="nav-item">
                 <a className="nav-link " aria-current="page" href="/">
                   Home
@@ -31,16 +55,18 @@ export default function Navbar() {
                   Blog
                 </a>
               </li>
-              <li className="nav-item">
-                <a className="nav-link" href="/single-post">
-                  Single Post
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="/pages">
-                  Pages
-                </a>
-              </li>
+           
+              {isAuthenticated ? (
+                <li className="bg-blue-500 rounded-md nav-item">
+                  <a className="nav-link" aria-current="page" href="/post">
+                    Post Article
+                  </a>
+                </li>
+              ) : (
+                ''
+              )}
+
+
               <li className="nav-item">
                 <a className="nav-link" href="/">
                   Contact
@@ -87,9 +113,39 @@ export default function Navbar() {
                 </svg>
               </button>
             </form>
+
+              
+            {isAuthenticated ? (
+              <div className="gap-2 d-flex align-items-center nav-item ms-3">
+                <a className="nav-link d-flex align-items-center" href="/single-post">
+                  <img
+                    src={currentUser ? currentUser.photoURL : Logo} // Replace with actual profile image path
+                    alt="Profile"
+                    style={{
+                      width: "35px",
+                      height: "35px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                    }}
+                  />
+                </a>
+                <button
+                  className="nav-link btn btn-link"
+                  onClick={handleLogout}
+                >
+                  Log Out 
+                </button>
+              </div>
+            ) : (
+              <div className="nav-item ms-3">
+                <a className="nav-link" href="/signin">
+                  Sign In
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </nav>
     </div>
   );
-}
+} 
