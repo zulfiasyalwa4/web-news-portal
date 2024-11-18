@@ -14,7 +14,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/pages" element={<Pages />} />
         <Route path="/article" element={<Article />} />
-        <Route path="/single-post" element={<SinglePost />}
+        <Route path="/single-post/:authorId" element={<SinglePost />}
         />
         <Route path="/articlesec/:articleId" element={<Articlesec />} />
         <Route path="/Signin" element={<Signin />} />

@@ -1,10 +1,14 @@
+/**
+ * Navbar component
+ *
+ * @return {JSX.Element}
+ */
 import { useState, useEffect } from "react";
 import Logo from "../../assets/logo.png";
 import { auth } from "../../firebase/setup";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 
 export default function Navbar() {
-  // Mock authentication state (replace this with your actual authentication logic)
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -116,36 +120,38 @@ console.log(currentUser);
 
               
             {isAuthenticated ? (
-              <div className="gap-2 d-flex align-items-center nav-item ms-3">
-                <a className="nav-link d-flex align-items-center" href="/single-post">
-                  <img
-                    src={currentUser ? currentUser.photoURL : Logo} // Replace with actual profile image path
-                    alt="Profile"
-                    style={{
-                      width: "35px",
-                      height: "35px",
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                    }}
-                  />
-                </a>
-                <button
-                  className="nav-link btn btn-link"
-                  onClick={handleLogout}
-                >
-                  Log Out 
-                </button>
-              </div>
-            ) : (
-              <div className="nav-item ms-3">
-                <a className="nav-link" href="/signin">
-                  Sign In
-                </a>
-              </div>
-            )}
+  <div className="gap-2 d-flex align-items-center nav-item ms-3">
+    <a className="nav-link d-flex align-items-center" href={`/single-post/${currentUser ? currentUser.uid : ''}`}>
+      <img
+        src={currentUser ? currentUser.photoURL : Logo} // Replace with actual profile image path
+        alt="Profile"
+        style={{
+          width: "35px",
+          height: "35px",
+          borderRadius: "50%",
+          objectFit: "cover",
+        }}
+      />
+    </a>
+    <button
+      className="nav-link btn btn-link"
+      onClick={handleLogout}
+    >
+      Log Out 
+    </button>
+  </div>
+) : (
+  <div className="nav-item ms-3">
+    <a className="nav-link" href="/signin">
+      Sign In
+    </a>
+  </div>
+)}
           </div>
         </div>
       </nav>
     </div>
   );
-} 
+}
+
+

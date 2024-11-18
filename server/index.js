@@ -1,4 +1,3 @@
-/*************  ✨ Codeium Command 🌟  *************/
 const dotenv = require('dotenv');
 dotenv.config();
 const mongoose = require("mongoose");
@@ -18,23 +17,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
 // Koneksi ke MongoDB
-const connectToMongoDB = async () => {
-    try {
-        const dotenv = require('dotenv');
-        dotenv.config();
-        const mongoose = require("mongoose");
-        await mongoose.connect(process.env.MONGODB_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        });
-        console.log('Connected to MongoDB');
-    } catch (error) {
-        console.log('Error connecting to MongoDB');
-        console.log(error);
-    }
-};
-
-connectToMongoDB();
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    console.log('Connected to MongoDB');
+}).catch(error => {
+    console.log('Error connecting to MongoDB');
+    console.log(error);
+});
 
 // Endpoint untuk mendapatkan artikel berdasarkan `articleId`
 app.get('/api/articles/:articleId', async (req, res) => {
@@ -53,6 +44,25 @@ app.get('/api/articles/:articleId', async (req, res) => {
 });
 
 
+// 
+app.get('/api/single-post/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        // Jika ID tidak valid sebagai ObjectId, tetapi Anda ingin tetap mencari dengan string
+        const author = await Author.findOne({ authorId: id });
+
+        if (!author) {
+            return res.status(404).json({ message: 'Author not found' });
+        }
+
+        res.status(200).json(author);
+    } catch (error) {
+        console.error(`Error fetching author profile: ${error.message}`);
+        res.status(500).json({ message: 'Error fetching author', error: error.message });
+    }
+});
+
+
 // Endpoint untuk mendapatkan semua artikel
 app.get('/api/articles', async (req, res) => {
     try {
@@ -63,6 +73,9 @@ app.get('/api/articles', async (req, res) => {
         res.status(500).json({ message: 'Error fetching articles', error });
     }
 });
+// Endpoint untuk mendapatkan profil penulis berdasarkan authorId
+
+
 
 // Endpoint untuk membuat artikel baru
 app.post('/api/articles', verifyFirebaseToken, async (req, res) => {
@@ -113,4 +126,3 @@ app.listen(process.env.PORT || 5000, () => {
     console.log("Server is running on port 5000");
 });
 
-/******  6194269c-bb6d-4af8-a161-0f8d7a6c0aa1  *******/

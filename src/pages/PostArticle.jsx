@@ -3,6 +3,7 @@ import axios from 'axios';
 import {auth } from '../firebase/setup';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
+import MainLayout from '../layout/MainLayout';
 
 
 
@@ -87,6 +88,7 @@ export default function PostArticle() {
   }, [photo]);
 
   return (
+    <MainLayout>
     <div className="container mt-5">
       <h1>Post an Article</h1>
       <form onSubmit={handleSubmit}>
@@ -196,6 +198,7 @@ export default function PostArticle() {
         </button>
       </form>
     </div>
+  </MainLayout>
   );
 }
 
