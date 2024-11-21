@@ -6,6 +6,7 @@ import SinglePost from "./pages/SinglePost";
 import Signin from "./pages/Signin";
 import PostArticle from "./pages/PostArticle";
 import Article from "./pages/Article";
+import EditPages from "./pages/EditPages";
 
 export default function App() {
   return (
@@ -20,7 +21,9 @@ export default function App() {
         <Route path="/Signin" element={<Signin />} />
         <Route path="*" element={<Home />} />
         <Route path="/post" element={<PostArticle />} />
+        <Route path="/edit/:articleId" element={<EditPages/>} /> 
       </Routes>
+      
     </BrowserRouter>
   );
 }

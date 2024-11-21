@@ -1,12 +1,13 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 // eslint-disable-next-line react/prop-types
-export default function CardPost({ image, category, title, authorName, authorImage, date, onClick }) {
+export default function CardPost({ image, category, title, authorName, authorImage, date, onClick, onDelete, onEdit }) {
   return (
     <div
-      className="shadow-sm card card-hover"
+      className="shadow-sm card card-hover position-relative"
       style={{ borderRadius: "12px", cursor: "pointer" }}
-      onClick={onClick} // Handler untuk klik
+      onClick={onClick}
     >
       <img
         src={image}
@@ -36,6 +37,30 @@ export default function CardPost({ image, category, title, authorName, authorIma
           </div>
         </div>
       </div>
+      {/* Action buttons */}
+      <div className="bottom-0 position-absolute end-0 d-flex">
+        <button
+          className="m-2 btn btn-danger"
+          style={{ borderRadius: "50%" }}
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent click from propagating
+            onDelete(); // Call onDelete function
+          }}
+        >
+          <i className="bi bi-trash"></i>
+        </button>
+        <button
+          className="m-2 btn btn-primary"
+          style={{ borderRadius: "50%" }}
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent click from propagating
+            onEdit(); // Call onEdit function
+          }}
+        >
+          <i className="bi bi-pencil"></i>
+        </button>
+      </div>
     </div>
   );
 }
+

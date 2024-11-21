@@ -94,6 +94,9 @@ const response = await fetch(`http://localhost:5000/api/articles/${cleanedArticl
     style={{ objectFit: "cover", aspectRatio: "16 / 9" }}
   />
 </div>
+<div className="mb-4">
+  <p>{article.content}</p>
+</div>
 
 
       {/* Article Content */}

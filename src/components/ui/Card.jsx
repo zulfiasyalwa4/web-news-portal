@@ -1,7 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 
 // eslint-disable-next-line react/prop-types
-export default function CardPost({ image, category, title, authorName, authorImage, date, onClick }) {
+export default function Card({ image, category, title, authorName, authorImage, date, onClick }) {
   return (
     <div
       className="shadow-sm card card-hover"

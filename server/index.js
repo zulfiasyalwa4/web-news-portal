@@ -27,6 +27,36 @@ mongoose.connect(process.env.MONGODB_URI, {
     console.log(error);
 });
 
+app.get('/api/articles', async (req, res) => {
+    try {
+      const authors = await Author.find(); // Retrieve all authors
+  
+      // Flatten all articles and include additional fields
+      const allArticles = authors.flatMap(author =>
+        author.articles.map(article => ({
+          articleId: article.articleId, // Include articleId explicitly
+          title: article.title,
+          category: article.category,
+          content: article.content,
+          mainImage: article.mainImage,
+          advertisementImage: article.advertisementImage,
+          sections: article.sections,
+          blockquote: article.blockquote,
+          publishDate: article.publishDate, // Include the publish date
+          authorName: author.name, // Include author's name
+          profileImage: author.profileImage, // Include author's profile image
+        }))
+      );
+  
+      res.status(200).json(allArticles);
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+      res.status(500).json({ message: "Error fetching articles", error });
+    }
+  });
+  
+  
+
 // Endpoint untuk mendapatkan artikel berdasarkan `articleId`
 app.get('/api/articles/:articleId', async (req, res) => {
     try {
@@ -42,6 +72,43 @@ app.get('/api/articles/:articleId', async (req, res) => {
         res.status(500).json({ message: 'Error fetching article', error: error.message });
     }
 });
+
+app.put('/api/articles/:articleId', async (req, res) => {
+    try {
+        const articleId = req.params.articleId.trim();
+        const { title, category, content, mainImage, advertisementImage, sections, blockquote } = req.body;
+
+        console.log(`Updating article with ID: ${articleId}`); // Debugging log
+
+        const author = await Author.findOneAndUpdate(
+            { 'articles.articleId': articleId },
+            {
+                $set: {
+                    'articles.$.title': title,
+                    'articles.$.category': category,
+                    'articles.$.content': content,
+                    'articles.$.mainImage': mainImage,
+                    'articles.$.advertisementImage': advertisementImage,
+                    'articles.$.sections': sections,
+                    'articles.$.blockquote': blockquote,
+                },
+            },
+            { new: true }
+        );
+
+        if (!author) {
+            return res.status(404).json({ message: 'Article not found' });
+        }
+
+        const updatedArticle = author.articles.find(article => article.articleId.toString() === articleId);
+        res.status(200).json(updatedArticle);
+    } catch (error) {
+        console.error(`Error updating article: ${error.message}`);
+        res.status(500).json({ message: 'Error updating article', error: error.message });
+    }
+});
+
+
 
 
 // 
@@ -121,7 +188,28 @@ app.post('/api/articles', verifyFirebaseToken, async (req, res) => {
     }
 });
 
+app.delete('/api/articles/:articleId', verifyFirebaseToken, async (req, res) => {
+    try {
+        const articleId = req.params.articleId;
+        const author = await Author.findOneAndUpdate(
+            { authorId: req.user.uid, 'articles.articleId': articleId },
+            { $pull: { articles: { articleId } } },
+            { new: true }
+        );
+
+        if (!author) {
+            return res.status(404).json({ message: 'Article not found' });
+        }
+
+        res.status(200).json({ message: 'Article deleted successfully' });
+    } catch (error) {
+        console.error(`Error deleting article: ${error.message}`);
+        res.status(500).json({ message: 'Error deleting article', error });
+    }
+});
+
 // Menjalankan server
+
 app.listen(process.env.PORT || 5000, () => {
     console.log("Server is running on port 5000");
 });
