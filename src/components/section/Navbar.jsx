@@ -1,9 +1,5 @@
-/**
- * Navbar component
- *
- * @return {JSX.Element}
- */
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Logo from "../../assets/logo.png";
 import { auth } from "../../firebase/setup";
 import { signOut, onAuthStateChanged } from "firebase/auth";
@@ -11,29 +7,34 @@ import { signOut, onAuthStateChanged } from "firebase/auth";
 export default function Navbar() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(""); // State for search input
+  const navigate = useNavigate(); // For navigation
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsAuthenticated(!!user);
       setCurrentUser(user);
     });
-
+    return unsubscribe; // Cleanup subscription
   }, []);
 
   const handleLogout = () => {
     signOut(auth);
   };
- 
-  
-console.log(isAuthenticated);
-console.log(currentUser);
-  auth.currentUser?.getIdToken().then(token => console.log('Token:',token)).catch(error => console.error('Error fetching token:', error));
+
+  // Handle search submission
+  const handleSearch = (e) => {
+    e.preventDefault(); // Prevent the default form submission
+    if (searchQuery.trim()) {
+      navigate(`/all-articles?query=${encodeURIComponent(searchQuery.trim())}`); // Navigate to the search results page
+    }
+  };
 
   return (
     <div className="container bg-white fixed-top">
-      <nav className="navbar navbar-expand-lg ">
+      <nav className="navbar navbar-expand-lg">
         <div className="container-fluid">
-          <a className="navbar-brand" href="#">
+          <a className="navbar-brand" href="/">
             <img src={Logo} alt="MetaBlog Logo" style={{ height: "40px" }} />
           </a>
           <button
@@ -50,39 +51,40 @@ console.log(currentUser);
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="mx-auto mb-2 navbar-nav mb-lg-0">
               <li className="nav-item">
-                <a className="nav-link " aria-current="page" href="/">
+                <a className="nav-link" aria-current="page" href="/">
                   Home
                 </a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="#blog">
-                  Blog
+                <a className="nav-link" href="/all-articles">
+                  All Articles
                 </a>
               </li>
-           
-              {isAuthenticated ? (
-                <li className="bg-blue-500 rounded-md nav-item">
+              {isAuthenticated && (
+                <li className="nav-item">
                   <a className="nav-link" aria-current="page" href="/post">
                     Post Article
                   </a>
                 </li>
-              ) : (
-                ''
               )}
-
-
               <li className="nav-item">
-                <a className="nav-link" href="/">
+                <a className="nav-link" href="/contact">
                   Contact
                 </a>
               </li>
             </ul>
-            <form className="d-flex position-relative" role="search">
+            <form
+              className="d-flex position-relative"
+              role="search"
+              onSubmit={handleSearch} // Trigger search on submit
+            >
               <input
                 className="form-control rounded-2"
                 type="search"
                 placeholder="Search"
                 aria-label="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)} // Update state on input
                 style={{
                   paddingRight: "45px",
                   backgroundColor: "#f4f4f4",
@@ -92,7 +94,7 @@ console.log(currentUser);
                 }}
               />
               <button
-                type="button"
+                type="submit" // Submit the form
                 className="btn position-absolute"
                 style={{
                   right: "10px",
@@ -117,41 +119,37 @@ console.log(currentUser);
                 </svg>
               </button>
             </form>
-
-              
             {isAuthenticated ? (
-  <div className="gap-2 d-flex align-items-center nav-item ms-3">
-    <a className="nav-link d-flex align-items-center" href={`/single-post/${currentUser ? currentUser.uid : ''}`}>
-      <img
-        src={currentUser ? currentUser.photoURL : Logo} // Replace with actual profile image path
-        alt="Profile"
-        style={{
-          width: "35px",
-          height: "35px",
-          borderRadius: "50%",
-          objectFit: "cover",
-        }}
-      />
-    </a>
-    <button
-      className="nav-link btn btn-link"
-      onClick={handleLogout}
-    >
-      Log Out 
-    </button>
-  </div>
-) : (
-  <div className="nav-item ms-3">
-    <a className="nav-link" href="/signin">
-      Sign In
-    </a>
-  </div>
-)}
+              <div className="gap-2 d-flex align-items-center nav-item ms-3">
+                <a
+                  className="nav-link d-flex align-items-center"
+                  href={`/single-post/${currentUser ? currentUser.uid : ""}`}
+                >
+                  <img
+                    src={currentUser ? currentUser.photoURL : Logo}
+                    alt="Profile"
+                    style={{
+                      width: "35px",
+                      height: "35px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                    }}
+                  />
+                </a>
+                <button className="nav-link btn btn-link" onClick={handleLogout}>
+                  Log Out
+                </button>
+              </div>
+            ) : (
+              <div className="nav-item ms-3">
+                <a className="nav-link" href="/signin">
+                  Sign In
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </nav>
     </div>
   );
 }
-
-

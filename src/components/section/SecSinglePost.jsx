@@ -1,22 +1,42 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import profile from "../../assets/profile.svg";
-import { useParams } from "react-router-dom";
+import { redirect, useParams } from "react-router-dom";
 import axios from "axios";
 import { useState, useEffect } from "react";
 
 export default function SecSinglePost() {
-  const { authorId } = useParams(); // Pindahkan `useParams` ke dalam komponen
+  const { authorId } = useParams(); // Mengambil parameter URL
+  const [user, setUser] = useState(null); // Data user yang ditampilkan
+  const [isEditing, setIsEditing] = useState(false); // Mode edit aktif/tidak
+  const [formData, setFormData] = useState({
+    name: "",
+    title: "",
+    userProfile: "",
+  });
 
-  const [user, setUser] = useState(null); // Inisialisasi state dengan null
-
+  // Fetch data user saat komponen pertama kali dirender
   useEffect(() => {
     const fetchAuthorProfile = async () => {
+      if (!authorId) {
+        console.error("Author ID is invalid or empty");
+        return;
+      }
+
       try {
         const cleanedAuthorId = encodeURIComponent(authorId.trim());
-        const response = await axios.get(`http://localhost:5000/api/single-post/${cleanedAuthorId}`);
+        const response = await axios.get(
+          `http://localhost:5000/api/single-post/${cleanedAuthorId}`
+        );
         const authorData = response.data;
-        setUser(authorData);
+
+        setUser(authorData); // Set state user
+        setFormData({
+          name: authorData.name || "",
+          title: authorData.title || "",
+          userProfile: authorData.userProfile || "",
+          profileImage: authorData.profileImage || "",
+        });
       } catch (error) {
         console.error("Error fetching author profile:", error);
       }
@@ -25,8 +45,57 @@ export default function SecSinglePost() {
     fetchAuthorProfile();
   }, [authorId]);
 
+  // Handle perubahan input di form
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Toggle mode edit
+  const handleEditToggle = () => {
+    setIsEditing((prev) => {
+      // Reset form jika keluar dari mode edit
+      if (prev) {
+        setFormData({
+          name: user.name || "",
+          title: user.title || "",
+          userProfile: user.userProfile || "",
+        });
+      }
+      return !prev;
+    });
+  };
+
+  // Simpan perubahan ke backend
+  const handleSave = async () => {
+    if (!authorId) {
+      console.error("Author ID is invalid or empty");
+      return;
+    }
+
+    try {
+      const cleanedAuthorId = encodeURIComponent(authorId.trim());
+      const response = await axios.put(
+        `http://localhost:5000/api/single-post/${cleanedAuthorId}`,
+        formData
+      );
+      setUser(response.data); // Update data user dengan hasil dari backend
+      setIsEditing(false); // Keluar dari mode edit
+    } catch (error) {
+      console.error("Error updating author profile:", error);
+    }
+    window.location.reload();
+  };
+
+  // Jika data user belum dimuat
   if (!user) {
-    return <p>Loading...</p>; // Tampilkan loading jika data belum ada
+    return (
+      <div className="container p-5 text-center">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -39,45 +108,81 @@ export default function SecSinglePost() {
           borderRadius: "12px",
         }}
       >
-        {/* Profile Image */}
+        {/* Tombol Edit */}
+        <div className="align-self-end">
+          <button
+            className="btn btn-sm btn-outline-secondary"
+            onClick={handleEditToggle}
+            title={isEditing ? "Cancel" : "Edit Profile"}
+          >
+            <i className={`bi ${isEditing ? "bi-x" : "bi-pencil"}`}></i>
+          </button>
+        </div>
+
+        {/* Gambar Profil */}
         <img
-          src={user.profileImage || profile} // Gunakan `user.profileImage` jika ada, fallback ke `profile`
-          alt={user.name}
+          src={user?.profileImage || profile}
+          alt={user?.name || "Profile"}
           className="mb-3 rounded-circle"
           style={{ width: "80px", height: "80px", objectFit: "cover" }}
         />
 
-        {/* Name and Title */}
-        <h4 className="fw-bold">{user.name}</h4>
-        <p className="text-muted">{user.title || "Author"}</p> {/* Fallback ke "Author" jika `title` kosong */}
+        {/* Nama dan Judul */}
+        {isEditing ? (
+          <>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="mb-2 form-control"
+              placeholder="Name"
+            />
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              className="mb-2 form-control"
+              placeholder="Title"
+            />
+            <input
+              type="text"
+              name="title"
+              value={formData.profileImage}
+              onChange={handleChange}
+              className="mb-2 form-control"
+              placeholder="Title"
+            />
+          </>
+        ) : (
+          <>
+            <h4 className="fw-bold">{user?.name || "Anonymous"}</h4>
+            <p className="text-muted">{user?.title || "Author"}</p>
+          </>
+        )}
 
-        {/* Description */}
-        <p className="px-4 text-center text-muted">{user.description || "No description available."}</p>
+        {/* Deskripsi */}
+        {isEditing ? (
+          <textarea
+            name="userProfile"
+            value={formData.userProfile}
+            onChange={handleChange}
+            className="mb-2 form-control"
+            placeholder="Description"
+            rows="3"
+          ></textarea>
+        ) : (
+          <p className="px-4 text-center text-muted">
+            {user?.userProfile || "No description available."}
+          </p>
+        )}
 
-        {/* Social Media Icons */}
-        {user.socialMedia && (
-          <div className="mt-3 d-flex justify-content-center">
-            {user.socialMedia.facebook && (
-              <a href={user.socialMedia.facebook} className="mx-2 text-dark">
-                <i className="bi bi-facebook" style={{ fontSize: "20px" }}></i>
-              </a>
-            )}
-            {user.socialMedia.twitter && (
-              <a href={user.socialMedia.twitter} className="mx-2 text-dark">
-                <i className="bi bi-twitter" style={{ fontSize: "20px" }}></i>
-              </a>
-            )}
-            {user.socialMedia.instagram && (
-              <a href={user.socialMedia.instagram} className="mx-2 text-dark">
-                <i className="bi bi-instagram" style={{ fontSize: "20px" }}></i>
-              </a>
-            )}
-            {user.socialMedia.youtube && (
-              <a href={user.socialMedia.youtube} className="mx-2 text-dark">
-                <i className="bi bi-youtube" style={{ fontSize: "20px" }}></i>
-              </a>
-            )}
-          </div>
+        {/* Tombol Simpan */}
+        {isEditing && (
+          <button className="mt-3 btn btn-primary" onClick={handleSave}>
+            Save Changes
+          </button>
         )}
       </div>
     </div>

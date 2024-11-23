@@ -7,6 +7,7 @@ import Signin from "./pages/Signin";
 import PostArticle from "./pages/PostArticle";
 import Article from "./pages/Article";
 import EditPages from "./pages/EditPages";
+import AllArticles from "./pages/AllArticles";
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="*" element={<Home />} />
         <Route path="/post" element={<PostArticle />} />
         <Route path="/edit/:articleId" element={<EditPages/>} /> 
+        <Route path='/all-articles' element={<AllArticles />} />
       </Routes>
       
     </BrowserRouter>

@@ -60,18 +60,33 @@ app.get('/api/articles', async (req, res) => {
 // Endpoint untuk mendapatkan artikel berdasarkan `articleId`
 app.get('/api/articles/:articleId', async (req, res) => {
     try {
-        console.log(`Received articleId: ${req.params.articleId}`);  // Debugging log
-        const author = await Author.findOne({ 'articles.articleId': req.params.articleId }, { 'articles.$': 1 });
+        const author = await Author.findOne({ 'articles.articleId': req.params.articleId }, { 'articles.$': 1, name: 1, profileImage: 1 });
+
         if (!author || !author.articles || author.articles.length === 0) {
-            console.log("Article not found");  // Debugging log
-            return res.status(404).json({ message: 'Article not found' });
+            return res.status(404).json({ message: 'Article not found' }); // Early return ensures no further execution
         }
-        res.status(200).json(author.articles[0]);
+
+        const article = author.articles[0];
+        res.status(200).json({
+            articleId: article.articleId,
+            title: article.title,
+            category: article.category,
+            content: article.content,
+            mainImage: article.mainImage,
+            advertisementImage: article.advertisementImage,
+            sections: article.sections,
+            blockquote: article.blockquote,
+            publishDate: article.publishDate,
+            authorName: author.name,
+            profileImage: author.profileImage,
+        });
     } catch (error) {
-        console.error(`Error fetching article: ${error.message}`);  // Log the error to see more details
+        console.error(`Error fetching article: ${error.message}`);
         res.status(500).json({ message: 'Error fetching article', error: error.message });
     }
 });
+
+
 
 app.put('/api/articles/:articleId', async (req, res) => {
     try {
@@ -129,19 +144,52 @@ app.get('/api/single-post/:id', async (req, res) => {
     }
 });
 
-
-// Endpoint untuk mendapatkan semua artikel
-app.get('/api/articles', async (req, res) => {
+// Update author profile
+app.put('/api/single-post/:id', async (req, res) => {
     try {
-        const authors = await Author.find();
-        const allArticles = authors.flatMap(author => author.articles);
-        res.status(200).json(allArticles);
+        const { id } = req.params;
+        const updateFields = req.body;
+
+        const updatedAuthor = await Author.findOneAndUpdate(
+            { authorId: id },
+            { $set: updateFields },
+            { new: true }
+        );
+
+        if (!updatedAuthor) {
+            return res.status(404).json({ message: 'Author not found' });
+        }
+        res.status(200).json(updatedAuthor);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching articles', error });
+        res.status(500).json({ message: 'Error updating author', error });
     }
 });
-// Endpoint untuk mendapatkan profil penulis berdasarkan authorId
 
+
+// Endpoint untuk mendapatkan semua artikel
+// Example: Node.js with Express
+app.get('/api/articles', async (req, res) => {
+    const { title, authorName } = req.query;
+  
+    try {
+      let query = {};
+      if (title) {
+        query.title = { $regex: new RegExp(title, 'i') }; // Case-insensitive search
+      }
+      if (authorName) {
+        query.authorName = { $regex: new RegExp(authorName, 'i') };
+      }
+  
+      const articles = await Article.find(query);
+      res.json(articles);
+    } catch (error) {
+      console.error('Error fetching articles:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
+
+//search
 
 
 // Endpoint untuk membuat artikel baru
