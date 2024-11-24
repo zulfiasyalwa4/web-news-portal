@@ -1,92 +1,55 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import CardPost from "../ui/CardPost";
-import image1 from "../../assets/image1.svg";
-import account1 from "../../assets/account1.svg";
-import image2 from "../../assets/image2.svg";
-import account2 from "../../assets/account2.svg";
-import image3 from "../../assets/image3.svg";
-import account3 from "../../assets/account3.svg";
-import image4 from "../../assets/image4.svg";
-import account4 from "../../assets/account4.svg";
-import image5 from "../../assets/image5.svg";
-import account5 from "../../assets/account5.svg";
-import image6 from "../../assets/image6.svg";
-import account6 from "../../assets/account6.svg";
-import image7 from "../../assets/image7.svg";
-import account7 from "../../assets/account7.svg";
-import image8 from "../../assets/image8.svg";
-import account8 from "../../assets/account8.svg";
-import image9 from "../../assets/image9.svg";
-import account9 from "../../assets/account9.svg";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import profile from "../../assets/profile.svg";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useState, useEffect } from "react";
+import Card from "../ui/Card";
 
 export default function SecBlog() {
+  const [articles, setArticles] = useState([]); // State untuk menyimpan semua artikel
+  const navigate = useNavigate(); // Gunakan untuk navigasi
+
+  // Ambil semua artikel dari API
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/articles"); // Panggil endpoint semua artikel
+        const allArticles = response.data;
+        setArticles(allArticles);
+      } catch (error) {
+        console.error("Error fetching articles:", error);
+      }
+    };
+
+    fetchArticles();
+  }, []);
+
+  if (articles.length === 0) {
+    return <p>Loading...</p>; // Tampilkan loading jika data belum ada
+  }
+
+  console.log(articles[0]);
+
   return (
-    <div id="blog" className="container" style={{ paddingTop: "15px" }}>
-      <h3 className="mb-4 mt-5 pt-5">Latest Post</h3>
-      <div className="row mb-4">
-        <div className="col-lg-4 col-md-6 mb-4">
-          <CardPost
-            image={image1}
-            account={account1}
-            onClick={() => (window.location.href = "/article")}
-          />
-        </div>
-        <div className="col-lg-4 col-md-6 mb-4">
-          <CardPost
-            image={image2}
-            account={account2}
-            onClick={() => (window.location.href = "/article")}
-          />
-        </div>
-        <div className="col-lg-4 col-md-6 mb-4">
-          <CardPost
-            image={image3}
-            account={account3}
-            onClick={() => (window.location.href = "/article")}
-          />
-        </div>
-        <div className="col-lg-4 col-md-6 mb-4">
-          <CardPost
-            image={image4}
-            account={account4}
-            onClick={() => (window.location.href = "/article")}
-          />
-        </div>
-        <div className="col-lg-4 col-md-6 mb-4">
-          <CardPost
-            image={image5}
-            account={account5}
-            onClick={() => (window.location.href = "/article")}
-          />
-        </div>
-        <div className="col-lg-4 col-md-6 mb-4">
-          <CardPost
-            image={image6}
-            account={account6}
-            onClick={() => (window.location.href = "/article")}
-          />
-        </div>
-        <div className="col-lg-4 col-md-6 mb-4">
-          <CardPost
-            image={image7}
-            account={account7}
-            onClick={() => (window.location.href = "/article")}
-          />
-        </div>
-        <div className="col-lg-4 col-md-6 mb-4">
-          <CardPost
-            image={image8}
-            account={account8}
-            onClick={() => (window.location.href = "/article")}
-          />
-        </div>
-        <div className="col-lg-4 col-md-6 mb-4">
-          <CardPost
-            image={image9}
-            account={account9}
-            onClick={() => (window.location.href = "/article")}
-          />
-        </div>
+    <div id="blog" className="container">
+      <h3 className="pt-5 mb-4">Latest Posts</h3>
+      <div className="row">
+        {articles
+          .sort((a, b) => new Date(b.publishDate) - new Date(a.publishDate)) // Urutkan artikel berdasarkan tanggal terbaru
+          .map((article) => (
+            <div className="mb-4 col-lg-4 col-md-6" key={article.articleId}>
+              <Card
+                image={article.mainImage}
+                title={article.title}
+                category={article.category}
+                authorName={article.authorName}
+                authorImage={article.profileImage || profile}
+                date={article.publishDate}
+                onClick={() => navigate(`/articlesec/${article.articleId}`)} // Navigasi dengan `useNavigate`
+              />
+            </div>
+          ))}
       </div>
     </div>
   );
