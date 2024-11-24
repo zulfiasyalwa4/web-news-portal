@@ -7,15 +7,17 @@ export default function Footer() {
       <div className="container">
         <div className="row">
           {/* About Section */}
-          <div className="col-md-3">
+          <div className="col-md-8">
             <h5>About</h5>
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam.
+              Blog Sphere is a news and information platform that provides a
+              variety of engaging articles on lifestyle, technology, travel,
+              business, economy, and sports. We&apos;re committed to delivering
+              high-quality content that&apos;s relevant to our readers&apos;
+              needs. Feel free to contact us for more information or inquiries.
             </p>
             <p>
-              <strong>Email:</strong> csblog@example.com
+              <strong>Email:</strong> blogsphere@blog.com
             </p>
             <p>
               <strong>Phone:</strong> 880 123 456 789
@@ -97,26 +99,6 @@ export default function Footer() {
           </div>
 
           {/* Newsletter Section */}
-          <div className="col-md-5">
-            <h5>Weekly Newsletter</h5>
-            <p>Get blog articles and offers via email</p>
-            <form className="d-flex">
-              <input
-                type="email"
-                className="form-control me-2"
-                placeholder="Your Email"
-                aria-label="Email"
-                style={{ borderRadius: "20px", padding: "10px" }}
-              />
-              <button
-                className="btn btn-primary"
-                type="submit"
-                style={{ borderRadius: "20px" }}
-              >
-                Subscribe
-              </button>
-            </form>
-          </div>
         </div>
 
         {/* Bottom Section */}
